@@ -1,9 +1,9 @@
 git:
 azimu_api:
-  host:
-  port:
-  auth_token:
+  host: ${AZIMU_API_HOST}
+  port: ${AZIMU_API_PORT}
+  auth_token: ${AZIMU_API_TOKEN}
 bitbucket:
-  client_key:
-  client_secret:
-  repositories:
+  client_key: ${CLIENT_KEY}
+  client_secret: ${CLIENT_SECRET}
+  repositories: ${CLIENT_REPOSITORIES}
