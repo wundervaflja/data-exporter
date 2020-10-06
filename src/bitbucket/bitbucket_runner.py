@@ -26,6 +26,7 @@ ONE_HOUR_SEC = 3600
 
 
 def run(endpoint):
+    result = False
     repositories = get_config("bitbucket.repositories")
     host = get_config("azimu_api.host")
     port = get_config("azimu_api.port")
@@ -36,6 +37,8 @@ def run(endpoint):
         process_pull_requests(repository, url, "OPEN")
         process_pull_requests(repository, url, "MERGED")
         process_refs(repository, url)
+        result = True
+    return result
 
 
 @sleep_and_retry

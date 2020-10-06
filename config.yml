@@ -1,4 +1,4 @@
-git:
+git: bitbucket
 azimu_api:
   host: ${AZIMU_API_HOST}
   port: ${AZIMU_API_PORT}
