@@ -7,3 +7,8 @@ bitbucket:
   client_key: ${CLIENT_KEY}
   client_secret: ${CLIENT_SECRET}
   repositories: ${CLIENT_REPOSITORIES}
+bitbucket:
+  user_email: ${USER_EMAIL}
+  user_name: ${USER_NAME}
+  app_password: ${APP_PASSWORD}
+  repositories: ${CLIENT_REPOSITORIES}
