@@ -49,6 +49,8 @@ def run(endpoint):
         process_pull_requests(repository, url, "OPEN")
         process_pull_requests(repository, url, "MERGED")
         process_refs(repository, url)
+        result = True
+    return result
 
 
 @sleep_and_retry
