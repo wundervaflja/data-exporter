@@ -170,12 +170,15 @@ def process_pull_requests(repository, url, state):
                                                                           owner=user_name,
                                                                           client=bitbucket_client, state=state)
     for pr in pull_requests:
-        logger.debug("BitBucket pull request - {}".format(pr.data))
-        pr_info = vars(get_pull_request_info(repository, pr.data))
-        process_user(pr_info['author_uuid'], url)
-        r = requests.post(f'https://{url}/{table_name}',
-                          json={"data": json.dumps(pr_info, sort_keys=True, default=str)},
-                          headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
-        if r.status_code != 200:
-            raise Exception(r.status_code)
-        return r.json()
+        try:
+            logger.debug("BitBucket pull request - {}".format(pr.data))
+            pr_info = vars(get_pull_request_info(repository, pr.data))
+            process_user(pr_info['author_uuid'], url)
+            r = requests.post(f'https://{url}/{table_name}',
+                              json={"data": json.dumps(pr_info, sort_keys=True, default=str)},
+                              headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
+            if r.status_code != 200:
+                raise Exception(r.status_code)
+            return r.json()
+        except:
+            logger.debug('Problem with {}'.format(pr))
