@@ -65,11 +65,11 @@ def process_user(username, url):
         logger.debug("No BitBucket user - {}".format(username))
     if user:
         user_info = vars(get_user_info(user))
-        r = requests.post(f'http://{url}/{table_name}',
+        r = requests.post(f'https://{url}/{table_name}',
                           json={"data": json.dumps(user_info, sort_keys=True, default=str)},
                           headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
         if r.status_code != 200:
-            raise Exception
+            raise Exception(r.status_code)
         return r.json()
 
 
@@ -84,11 +84,12 @@ def process_repository(repository, url):
     repository_info = vars(get_repository_info(repository.data))
     logger.debug("BitBucket repository owner - {}".format(repository_info['owner_uuid']))
     process_user(repository_info['owner_uuid'], url)
-    r = requests.post(f'http://{url}/{table_name}',
+    print(f'https://{url}/{table_name}')
+    r = requests.post(f'https://{url}/{table_name}',
                       json={"repository": json.dumps(repository_info, sort_keys=True, default=str)},
                       headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
     if r.status_code != 200:
-        raise Exception
+        raise Exception(r.status_code)
     return r.json()
 
 
@@ -105,18 +106,18 @@ def process_commits(repository, url):
         process_user(commit_info.author_uuid, url)
         commits.append(vars(commit_info))
         if len(commits) == BATCH_SIZE:
-            r = requests.post(f'http://{url}/{table_name}', json={"repository": repository,
+            r = requests.post(f'https://{url}/{table_name}', json={"repository": repository,
                                                                   "data": json.dumps(commits, sort_keys=True,
                                                                                      default=str)
                                                                   },
                               headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
             if r.status_code != 200:
                 print(r.raw)
-                raise Exception
+                raise Exception(r.status_code)
 
             commits = []
     if commits:
-        r = requests.post(f'http://{url}/{table_name}', json={"repository": repository,
+        r = requests.post(f'https://{url}/{table_name}', json={"repository": repository,
                                                               "data": json.dumps(commits, sort_keys=True, default=str)
                                                               },
                           headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
@@ -152,11 +153,11 @@ def process_refs(repository, url):
     for ref in refs:
         logger.debug("Bitbucket ref - {}".format(ref))
         ref_info = vars(get_ref_info(ref.data, repository))
-        r = requests.post(f'http://{url}/{table_name}',
+        r = requests.post(f'https://{url}/{table_name}',
                           json={"data": json.dumps(ref_info, sort_keys=True, default=str)},
                           headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
         if r.status_code != 200:
-            raise Exception
+            raise Exception(r.status_code)
         return r.json()
 
 
@@ -172,9 +173,9 @@ def process_pull_requests(repository, url, state):
         logger.debug("BitBucket pull request - {}".format(pr.data))
         pr_info = vars(get_pull_request_info(repository, pr.data))
         process_user(pr_info['author_uuid'], url)
-        r = requests.post(f'http://{url}/{table_name}',
+        r = requests.post(f'https://{url}/{table_name}',
                           json={"data": json.dumps(pr_info, sort_keys=True, default=str)},
                           headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
         if r.status_code != 200:
-            raise Exception
+            raise Exception(r.status_code)
         return r.json()
