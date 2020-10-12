@@ -153,11 +153,12 @@ def process_refs(repository, url):
     for ref in refs:
         logger.debug("Bitbucket ref - {}".format(ref))
         ref_info = vars(get_ref_info(ref.data, repository))
-        r = requests.post(f'https://{url}/{table_name}',
-                          json={"data": json.dumps(ref_info, sort_keys=True, default=str)},
-                          headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
-        if r.status_code != 200:
-            raise Exception(r.status_code)
+        if ref_info:
+            r = requests.post(f'https://{url}/{table_name}',
+                              json={"data": json.dumps(ref_info, sort_keys=True, default=str)},
+                              headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
+            if r.status_code != 200:
+                raise Exception(r.status_code)
         return r.json()
 
 
