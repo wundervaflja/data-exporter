@@ -24,6 +24,7 @@ bitbucket_client = Client(bitbucket_client)
 BATCH_SIZE = 100
 ONE_HOUR_SEC = 3600
 
+USER = {}
 
 def add_remote_relationship_methods(self, data):
     for name, url in BitbucketBase.links_from(data):
@@ -58,19 +59,23 @@ def run(endpoint):
 def process_user(username, url):
     table_name = "bitbucket_user"
     user = None
-    try:
-        user = User.find_user_by_username(username=username, client=bitbucket_client)
-        logger.debug("BitBucket user - {}".format(user))
-    except HTTPError:
-        logger.debug("No BitBucket user - {}".format(username))
-    if user:
-        user_info = vars(get_user_info(user))
-        r = requests.post(f'https://{url}/{table_name}',
-                          json={"data": json.dumps(user_info, sort_keys=True, default=str)},
-                          headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
-        if r.status_code != 200:
-            raise Exception(r.status_code)
-        return r.json()
+    if username not in USER:
+        try:
+            user = User.find_user_by_username(username=username, client=bitbucket_client)
+            logger.debug("BitBucket user - {}".format(user))
+        except HTTPError:
+            logger.debug("No BitBucket user - {}".format(username))
+        if user:
+            user_info = vars(get_user_info(user))
+            r = requests.post(f'https://{url}/{table_name}',
+                              json={"data": json.dumps(user_info, sort_keys=True, default=str)},
+                              headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
+            if r.status_code != 200:
+                raise Exception(r.status_code)
+            USER[username] = r.json()
+            return r.json()
+    else:
+        return USER[username]
 
 
 @sleep_and_retry
@@ -155,7 +160,9 @@ def process_refs(repository, url):
         ref_info = vars(get_ref_info(ref.data, repository))
         if ref_info:
             r = requests.post(f'https://{url}/{table_name}',
-                              json={"data": json.dumps(ref_info, sort_keys=True, default=str)},
+                              json={"ref": json.dumps(ref_info, sort_keys=True, default=str),
+                                    "repository": repository_name
+                                    },
                               headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
             if r.status_code != 200:
                 raise Exception(r.status_code)
