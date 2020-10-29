@@ -1,0 +1,10 @@
+git: bitbucket
+azimu_api:
+  host: ${AZIMU_API_HOST}
+  port: ${AZIMU_API_PORT}
+  auth_token: ${AZIMU_API_TOKEN}
+bitbucket:
+  user_email: ${USER_EMAIL}
+  user_name: ${USER_NAME}
+  app_password: ${APP_PASSWORD}
+  repositories: ${CLIENT_REPOSITORIES}
