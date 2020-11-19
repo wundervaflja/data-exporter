@@ -11,7 +11,6 @@ class BitbucketUserInfo:
     type: str
     account_id: str
 
-
 def get_user_info(user):
     user_info = BitbucketUserInfo()
     user_info.uuid = user.get("uuid")

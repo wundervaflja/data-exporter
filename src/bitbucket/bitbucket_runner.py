@@ -46,7 +46,7 @@ def run(endpoint):
     url = f"{host}:{port}{endpoint}"
     for repository in repositories:
         process_repository(repository, url)
-        process_commits(repository, url)
+        # process_commits(repository, url)
         process_pull_requests(repository, url, "OPEN")
         process_pull_requests(repository, url, "MERGED")
         process_refs(repository, url)
@@ -98,55 +98,55 @@ def process_repository(repository, url):
     return r.json()
 
 
-@sleep_and_retry
-@limits(calls=350, period=ONE_HOUR_SEC)
-def process_commits(repository, url):
-    table_name = "bitbucket_commit"
-    commits = []
-    user_name, repo_name = repository.split("/")
-    for commit in Commit.find_commits_in_repository(user_name, repo_name, client=bitbucket_client):
-        logger.debug("BitBucket commit - {}".format(commit))
-        commit_stats = get_commit_stats(repository, commit.hash)
-        commit_info = get_commit_payload(repository, commit.data, commit_stats)
-        process_user(commit_info.author_uuid, url)
-        commits.append(vars(commit_info))
-        if len(commits) == BATCH_SIZE:
-            r = requests.post(f'https://{url}/{table_name}', json={"repository": repository,
-                                                                  "data": json.dumps(commits, sort_keys=True,
-                                                                                     default=str)
-                                                                  },
-                              headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
-            if r.status_code != 200:
-                print(r.raw)
-                raise Exception(r.status_code)
+# @sleep_and_retry
+# @limits(calls=350, period=ONE_HOUR_SEC)
+# def process_commits(repository, url):
+#     table_name = "bitbucket_commit"
+#     commits = []
+#     user_name, repo_name = repository.split("/")
+#     for commit in Commit.find_commits_in_repository(user_name, repo_name, client=bitbucket_client):
+#         logger.debug("BitBucket commit - {}".format(commit))
+#         commit_stats = get_commit_stats(repository, commit.hash)
+#         commit_info = get_commit_payload(repository, commit.data, commit_stats)
+#         process_user(commit_info.author_uuid, url)
+#         commits.append(vars(commit_info))
+#         if len(commits) == BATCH_SIZE:
+#             r = requests.post(f'https://{url}/{table_name}', json={"repository": repository,
+#                                                                   "data": json.dumps(commits, sort_keys=True,
+#                                                                                      default=str)
+#                                                                   },
+#                               headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
+#             if r.status_code != 200:
+#                 print(r.raw)
+#                 raise Exception(r.status_code)
 
-            commits = []
-    if commits:
-        r = requests.post(f'https://{url}/{table_name}', json={"repository": repository,
-                                                              "data": json.dumps(commits, sort_keys=True, default=str)
-                                                              },
-                          headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
-    return r.json()
+#             commits = []
+#     if commits:
+#         r = requests.post(f'https://{url}/{table_name}', json={"repository": repository,
+#                                                               "data": json.dumps(commits, sort_keys=True, default=str)
+#                                                               },
+#                           headers={"AUTH_TOKEN": get_config("azimu_api.auth_token")})
+#     return r.json()
 
 
-@sleep_and_retry
-@limits(calls=350, period=ONE_HOUR_SEC)
-def get_commit_stats(repo, commit_hash):
-    user_name, repository_name = repo.split("/")
-    url = "https://api.bitbucket.org/2.0/repositories/{username}/{repo_slug}/diffstat/{spec}"
-    r = bitbucket_client.session.get(
-        url.format(username=user_name, repo_slug=repository_name, spec=commit_hash))
-    total_lines_added = 0
-    total_lines_removed = 0
-    if r.status_code == 200:
-        response = r.json()
-        for file in response["values"]:
-            total_lines_added += file.get("lines_added")
-            total_lines_removed += file.get("lines_removed")
-    else:
-        logger.error("Bad response - {}".format(r.text))
-    logger.debug(f"Commit {commit_hash} stats - + {total_lines_added} and - {total_lines_removed}")
-    return total_lines_added, total_lines_removed
+# @sleep_and_retry
+# @limits(calls=350, period=ONE_HOUR_SEC)
+# def get_commit_stats(repo, commit_hash):
+#     user_name, repository_name = repo.split("/")
+#     url = "https://api.bitbucket.org/2.0/repositories/{username}/{repo_slug}/diffstat/{spec}"
+#     r = bitbucket_client.session.get(
+#         url.format(username=user_name, repo_slug=repository_name, spec=commit_hash))
+#     total_lines_added = 0
+#     total_lines_removed = 0
+#     if r.status_code == 200:
+#         response = r.json()
+#         for file in response["values"]:
+#             total_lines_added += file.get("lines_added")
+#             total_lines_removed += file.get("lines_removed")
+#     else:
+#         logger.error("Bad response - {}".format(r.text))
+#     logger.debug(f"Commit {commit_hash} stats - + {total_lines_added} and - {total_lines_removed}")
+#     return total_lines_added, total_lines_removed
 
 
 @sleep_and_retry
