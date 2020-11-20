@@ -8,3 +8,5 @@ bitbucket:
   user_name: ${USER_NAME}
   app_password: ${APP_PASSWORD}
   repositories: ${CLIENT_REPOSITORIES}
+
+azimu_repo_path: ${AZIMU_EXPORTER_REPO_DIR}
