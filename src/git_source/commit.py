@@ -23,10 +23,10 @@ def get_commit_payload(commit):
     commit_info = CommitInfo()
     commit_info.repo_name = commit.repo.git_dir.split('/')[-2]
     commit_info.hash = commit.hexsha
-    author_name = commit.author.name or ''
-    author_email = commit.author.email or ''
-    committer_name = commit.committer.name or ''
-    commiter_email = commit.committer.email or ''
+    commit_info.author_name = commit.author.name
+    commit_info.author_email = commit.author.email
+    commit_info.committer_name = commit.committer.name
+    commit_info.commiter_email = commit.committer.email
     commit_info.message = commit.message
     commit_info.committed_date = commit.committed_date
     commit_info.timezone = time.tzname
