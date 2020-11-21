@@ -26,7 +26,7 @@ def run():
     for repo in __get_repos(path):
         __process_repository(repo, url)
         __process_commits(repo, url)
-        __process_refs(repo, url)
+        #__process_refs(repo, url)
 
 def __get_repos(path=''):
     path = os.path.abspath(path)
